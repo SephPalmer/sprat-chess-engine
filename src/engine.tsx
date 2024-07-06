@@ -1,7 +1,6 @@
 import React from "react";
-import App from "./App.tsx";
 
-type Piece = '♜' | '♞' | '♝' | '♛' | '♚' | '♝' | '♞' | '♜' | '♟' | '♙' | '♖' | '♘' | '♗' | '♕' | '♔' | '' ;
+type Piece = '♛' | '♚' | '♝' | '♞' | '♜' | '♟' | '♙' | '♖' | '♘' | '♗' | '♕' | '♔' | '' ;
 type Board = Piece[][];
 type Player = 'white' | 'black';
 type Position = [number, number];
@@ -125,10 +124,10 @@ const isSquareUnderAttack = (row: number, col: number, board: Board, attackingCo
             const piece = board[i][j];
             if (piece && (attackingColor === 'white' ? isWhitePiece(piece) : isBlackPiece(piece))) {
                 let isAttacking = false;
+                const direction = attackingColor === 'white' ? -1 : 1;
                 switch(piece) {
                     case '♙':
                     case '♟':
-                        const direction = attackingColor === 'white' ? -1 : 1;
                         isAttacking = (Math.abs(j - col) === 1 && i + direction === row);
                         break;
                     case '♘':
@@ -376,7 +375,7 @@ const Chessboard: React.FC = () => {
             const [fromRow, fromCol] = randomMove.from;
             const [toRow, toCol] = randomMove.to;
 
-            let movedPiece = newBoard[fromRow][fromCol];
+            const movedPiece = newBoard[fromRow][fromCol];
             newBoard[toRow][toCol] = movedPiece;
             newBoard[fromRow][fromCol] = '';
 
