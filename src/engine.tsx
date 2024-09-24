@@ -508,7 +508,7 @@ const Chessboard: React.FC = () => {
             const [fromRow, fromCol] = randomMove.from;
             const [toRow, toCol] = randomMove.to;
 
-            let movedPiece = newBoard[fromRow][fromCol];
+            const movedPiece = newBoard[fromRow][fromCol];
             newBoard[toRow][toCol] = movedPiece;
             newBoard[fromRow][fromCol] = '';
 
