@@ -1,15 +1,44 @@
-
-
 import React from "react";
 
-type Piece = '♜' | '♞' | '♝' | '♛' | '♚' | '♟' | '♙' | '♖' | '♘' | '♗' | '♕' | '♔' | '' ;
-type Board = Piece[][];
+// Import images for the chess pieces
+import WhitePawnImage from './assets/white_pawn.png';
+import WhiteRookImage from './assets/white_rook.png';
+import WhiteKnightImage from './assets/white_knight.png';
+import WhiteBishopImage from './assets/white_bishop.png';
+import WhiteQueenImage from './assets/white_queen.png';
+import WhiteKingImage from './assets/white_king.png';
+
+import BlackPawnImage from './assets/black_pawn.png';
+import BlackRookImage from './assets/black_rook.png';
+import BlackKnightImage from './assets/black_knight.png';
+import BlackBishopImage from './assets/black_bishop.png';
+import BlackQueenImage from './assets/black_queen.png';
+import BlackKingImage from './assets/black_king.png';
+
+// Define the PieceType enumeration
+enum PieceType {
+    None,
+    WhitePawn,
+    WhiteRook,
+    WhiteKnight,
+    WhiteBishop,
+    WhiteQueen,
+    WhiteKing,
+    BlackPawn,
+    BlackRook,
+    BlackKnight,
+    BlackBishop,
+    BlackQueen,
+    BlackKing
+}
+
+type Board = PieceType[][];
 type Player = 'white' | 'black';
 type Position = [number, number];
 type Move = { from: Position; to: Position };
 
 interface ChessSquareProps {
-    piece: Piece;
+    piece: PieceType;
     isLight: boolean;
     isSelected: boolean;
     isLegalMove: boolean;
@@ -17,44 +46,66 @@ interface ChessSquareProps {
 }
 
 interface SelectedPiece {
-    piece: Piece;
+    piece: PieceType;
     row: number;
     col: number;
 }
 
 interface PromotionModalProps {
-    onPromote: (piece: Piece) => void;
+    onPromote: (piece: PieceType) => void;
     player: Player;
 }
 
+// Map PieceType to image sources
+const pieceImages: { [key in PieceType]: string } = {
+    [PieceType.None]: '',
+    [PieceType.WhitePawn]: WhitePawnImage,
+    [PieceType.WhiteRook]: WhiteRookImage,
+    [PieceType.WhiteKnight]: WhiteKnightImage,
+    [PieceType.WhiteBishop]: WhiteBishopImage,
+    [PieceType.WhiteQueen]: WhiteQueenImage,
+    [PieceType.WhiteKing]: WhiteKingImage,
+    [PieceType.BlackPawn]: BlackPawnImage,
+    [PieceType.BlackRook]: BlackRookImage,
+    [PieceType.BlackKnight]: BlackKnightImage,
+    [PieceType.BlackBishop]: BlackBishopImage,
+    [PieceType.BlackQueen]: BlackQueenImage,
+    [PieceType.BlackKing]: BlackKingImage,
+};
+
 const INITIAL_BOARD: Board = [
-    ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
-    ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'],
-    ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
+    [PieceType.BlackRook, PieceType.BlackKnight, PieceType.BlackBishop, PieceType.BlackQueen, PieceType.BlackKing, PieceType.BlackBishop, PieceType.BlackKnight, PieceType.BlackRook],
+    [PieceType.BlackPawn, PieceType.BlackPawn, PieceType.BlackPawn, PieceType.BlackPawn, PieceType.BlackPawn, PieceType.BlackPawn, PieceType.BlackPawn, PieceType.BlackPawn],
+    [PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None],
+    [PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None],
+    [PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None],
+    [PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None, PieceType.None],
+    [PieceType.WhitePawn, PieceType.WhitePawn, PieceType.WhitePawn, PieceType.WhitePawn, PieceType.WhitePawn, PieceType.WhitePawn, PieceType.WhitePawn, PieceType.WhitePawn],
+    [PieceType.WhiteRook, PieceType.WhiteKnight, PieceType.WhiteBishop, PieceType.WhiteQueen, PieceType.WhiteKing, PieceType.WhiteBishop, PieceType.WhiteKnight, PieceType.WhiteRook]
 ];
 
-const isWhitePiece = (piece: Piece): boolean => '♔♕♖♗♘♙'.includes(piece);
-const isBlackPiece = (piece: Piece): boolean => '♚♛♜♝♞♟'.includes(piece);
+const isWhitePiece = (piece: PieceType): boolean => {
+    return piece >= PieceType.WhitePawn && piece <= PieceType.WhiteKing;
+};
+
+const isBlackPiece = (piece: PieceType): boolean => {
+    return piece >= PieceType.BlackPawn && piece <= PieceType.BlackKing;
+};
 
 const isValidPawnMove = (
     startRow: number,
     startCol: number,
     endRow: number,
     endCol: number,
-    piece: Piece,
+    piece: PieceType,
     board: Board,
     enPassantTarget: Position | null
 ): boolean => {
-    const isWhitePawn = piece === '♙';
+    const isWhitePawn = piece === PieceType.WhitePawn;
     const direction = isWhitePawn ? -1 : 1;
     const startingRow = isWhitePawn ? 6 : 1;
 
-    if (startCol === endCol && endRow === startRow + direction && !board[endRow][endCol]) {
+    if (startCol === endCol && endRow === startRow + direction && board[endRow][endCol] === PieceType.None) {
         return true;
     }
 
@@ -62,15 +113,15 @@ const isValidPawnMove = (
         startCol === endCol &&
         startRow === startingRow &&
         endRow === startRow + 2 * direction &&
-        !board[startRow + direction][startCol] &&
-        !board[endRow][endCol]
+        board[startRow + direction][startCol] === PieceType.None &&
+        board[endRow][endCol] === PieceType.None
     ) {
         return true;
     }
 
     if (Math.abs(startCol - endCol) === 1 && endRow === startRow + direction) {
         const targetPiece = board[endRow][endCol];
-        return !!targetPiece && isWhitePawn !== isWhitePiece(targetPiece);
+        return targetPiece !== PieceType.None && isWhitePawn !== isWhitePiece(targetPiece);
     }
 
     // En passant capture
@@ -116,7 +167,7 @@ const isValidBishopMove = (
     for (let i = 1; i < rowDiff; i++) {
         const row = startRow + i * rowDirection;
         const col = startCol + i * colDirection;
-        if (board[row][col] !== '') {
+        if (board[row][col] !== PieceType.None) {
             return false;
         }
     }
@@ -142,7 +193,7 @@ const isValidRookMove = (
     let currentCol = startCol + colDirection;
 
     while (currentRow !== endRow || currentCol !== endCol) {
-        if (board[currentRow][currentCol] !== '') {
+        if (board[currentRow][currentCol] !== PieceType.None) {
             return false;
         }
         currentRow += rowDirection;
@@ -175,7 +226,7 @@ const isSquareUnderAttack = (
         for (let j = 0; j < 8; j++) {
             const piece = board[i][j];
             if (
-                piece &&
+                piece !== PieceType.None &&
                 (attackingColor === 'white' ? isWhitePiece(piece) : isBlackPiece(piece))
             ) {
                 let isAttacking = false;
@@ -183,30 +234,29 @@ const isSquareUnderAttack = (
                 const rowDiff = Math.abs(row - i);
                 const colDiff = Math.abs(col - j);
                 switch (piece) {
-                    case '♙':
-                    case '♟':
+                    case PieceType.WhitePawn:
+                    case PieceType.BlackPawn:
                         isAttacking =
                             Math.abs(j - col) === 1 && i + direction === row;
                         break;
-                    case '♘':
-                    case '♞':
+                    case PieceType.WhiteKnight:
+                    case PieceType.BlackKnight:
                         isAttacking = isValidKnightMove(i, j, row, col);
                         break;
-                    case '♗':
-                    case '♝':
+                    case PieceType.WhiteBishop:
+                    case PieceType.BlackBishop:
                         isAttacking = isValidBishopMove(i, j, row, col, board);
                         break;
-                    case '♖':
-                    case '♜':
+                    case PieceType.WhiteRook:
+                    case PieceType.BlackRook:
                         isAttacking = isValidRookMove(i, j, row, col, board);
                         break;
-                    case '♕':
-                    case '♛':
+                    case PieceType.WhiteQueen:
+                    case PieceType.BlackQueen:
                         isAttacking = isValidQueenMove(i, j, row, col, board);
                         break;
-                    case '♔':
-                    case '♚':
-
+                    case PieceType.WhiteKing:
+                    case PieceType.BlackKing:
                         isAttacking = rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff) > 0;
                         break;
                 }
@@ -240,39 +290,40 @@ const isValidKingMove = (
 
     const isBasicMoveValid = rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff) > 0;
 
+    const oppositeColor = kingColor === 'white' ? 'black' : 'white';
+
     if (isBasicMoveValid) {
-        const oppositeColor = kingColor === 'white' ? 'black' : 'white';
         return !isSquareUnderAttack(endRow, endCol, board, oppositeColor);
     }
 
     // Castling logic
     if (rowDiff === 0 && colDiff === 2) {
         // Cannot castle out of check
-        if (isSquareUnderAttack(startRow, startCol, board, kingColor === 'white' ? 'black' : 'white')) {
+        if (isSquareUnderAttack(startRow, startCol, board, oppositeColor)) {
             return false;
         }
 
         if (kingColor === 'white') {
             if (endCol === 6) { // King-side castling
                 if (movedPieces.whiteKingMoved || movedPieces.whiteKingRookMoved) return false;
-                if (board[7][5] !== '' || board[7][6] !== '') return false;
+                if (board[7][5] !== PieceType.None || board[7][6] !== PieceType.None) return false;
                 if (isSquareUnderAttack(7, 5, board, 'black') || isSquareUnderAttack(7, 6, board, 'black')) return false;
                 return true;
             } else if (endCol === 2) { // Queen-side castling
                 if (movedPieces.whiteKingMoved || movedPieces.whiteQueenRookMoved) return false;
-                if (board[7][1] !== '' || board[7][2] !== '' || board[7][3] !== '') return false;
+                if (board[7][1] !== PieceType.None || board[7][2] !== PieceType.None || board[7][3] !== PieceType.None) return false;
                 if (isSquareUnderAttack(7, 3, board, 'black') || isSquareUnderAttack(7, 2, board, 'black')) return false;
                 return true;
             }
         } else {
             if (endCol === 6) { // King-side castling
                 if (movedPieces.blackKingMoved || movedPieces.blackKingRookMoved) return false;
-                if (board[0][5] !== '' || board[0][6] !== '') return false;
+                if (board[0][5] !== PieceType.None || board[0][6] !== PieceType.None) return false;
                 if (isSquareUnderAttack(0, 5, board, 'white') || isSquareUnderAttack(0, 6, board, 'white')) return false;
                 return true;
             } else if (endCol === 2) { // Queen-side castling
                 if (movedPieces.blackKingMoved || movedPieces.blackQueenRookMoved) return false;
-                if (board[0][1] !== '' || board[0][2] !== '' || board[0][3] !== '') return false;
+                if (board[0][1] !== PieceType.None || board[0][2] !== PieceType.None || board[0][3] !== PieceType.None) return false;
                 if (isSquareUnderAttack(0, 3, board, 'white') || isSquareUnderAttack(0, 2, board, 'white')) return false;
                 return true;
             }
@@ -299,10 +350,10 @@ const getAllLegalMoves = (board: Board, color: Player, enPassantTarget: Position
                 pieceMoves.forEach(move => {
                     const newBoard = board.map(r => [...r]);
                     newBoard[move[0]][move[1]] = newBoard[row][col];
-                    newBoard[row][col] = '';
+                    newBoard[row][col] = PieceType.None;
 
                     if (!isInCheck(newBoard, color)) {
-                        moves.push({from: [row, col], to: move});
+                        moves.push({ from: [row, col], to: move });
                     }
                 });
             }
@@ -312,7 +363,7 @@ const getAllLegalMoves = (board: Board, color: Player, enPassantTarget: Position
 };
 
 const getLegalMoves = (
-    piece: Piece,
+    piece: PieceType,
     row: number,
     col: number,
     board: Board,
@@ -326,35 +377,35 @@ const getLegalMoves = (
         for (let j = 0; j < 8; j++) {
             const targetPiece = board[i][j];
 
-            if (targetPiece && isWhite === isWhitePiece(targetPiece)) {
+            if (targetPiece !== PieceType.None && isWhite === isWhitePiece(targetPiece)) {
                 continue;
             }
 
             let isLegalMove = false;
 
             switch (piece) {
-                case '♙':
-                case '♟':
+                case PieceType.WhitePawn:
+                case PieceType.BlackPawn:
                     isLegalMove = isValidPawnMove(row, col, i, j, piece, board, enPassantTarget);
                     break;
-                case '♘':
-                case '♞':
+                case PieceType.WhiteKnight:
+                case PieceType.BlackKnight:
                     isLegalMove = isValidKnightMove(row, col, i, j);
                     break;
-                case '♗':
-                case '♝':
+                case PieceType.WhiteBishop:
+                case PieceType.BlackBishop:
                     isLegalMove = isValidBishopMove(row, col, i, j, board);
                     break;
-                case '♖':
-                case '♜':
+                case PieceType.WhiteRook:
+                case PieceType.BlackRook:
                     isLegalMove = isValidRookMove(row, col, i, j, board);
                     break;
-                case '♕':
-                case '♛':
+                case PieceType.WhiteQueen:
+                case PieceType.BlackQueen:
                     isLegalMove = isValidQueenMove(row, col, i, j, board);
                     break;
-                case '♔':
-                case '♚':
+                case PieceType.WhiteKing:
+                case PieceType.BlackKing:
                     isLegalMove = isValidKingMove(row, col, i, j, board, isWhite ? 'white' : 'black', movedPieces);
                     break;
             }
@@ -366,8 +417,8 @@ const getLegalMoves = (
     }
 
     // En passant handling
-    if ((piece === '♙' || piece === '♟') && enPassantTarget) {
-        const direction = piece === '♙' ? -1 : 1;
+    if ((piece === PieceType.WhitePawn || piece === PieceType.BlackPawn) && enPassantTarget) {
+        const direction = piece === PieceType.WhitePawn ? -1 : 1;
         if (row + direction === enPassantTarget[0] && Math.abs(col - enPassantTarget[1]) === 1) {
             legalMoves.push(enPassantTarget);
         }
@@ -378,10 +429,10 @@ const getLegalMoves = (
 
 const isInCheck = (board: Board, color: Player): boolean => {
     let kingRow: number | undefined, kingCol: number | undefined;
-    const kingSymbol = color === 'white' ? '♔' : '♚';
+    const kingPiece = color === 'white' ? PieceType.WhiteKing : PieceType.BlackKing;
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-            if (board[i][j] === kingSymbol) {
+            if (board[i][j] === kingPiece) {
                 kingRow = i;
                 kingCol = j;
                 break;
@@ -407,7 +458,7 @@ const isCheckmate = (board: Board, color: Player, enPassantTarget: Position | nu
         const [fromRow, fromCol] = move.from;
         const [toRow, toCol] = move.to;
         newBoard[toRow][toCol] = newBoard[fromRow][fromCol];
-        newBoard[fromRow][fromCol] = '';
+        newBoard[fromRow][fromCol] = PieceType.None;
 
         if (!isInCheck(newBoard, color)) {
             return false;
@@ -435,21 +486,24 @@ const ChessSquare: React.FC<ChessSquareProps> = ({ piece, isLight, isSelected, i
             justifyContent: 'center',
             alignItems: 'center',
             cursor: 'pointer',
-            fontSize: '2rem',
         }}
     >
-        {piece}
+        {piece !== PieceType.None && (
+            <img src={pieceImages[piece]} alt="" style={{ width: '80%', height: '80%' }} />
+        )}
     </div>
 );
 
 const PromotionModal: React.FC<PromotionModalProps> = ({ onPromote, player }) => {
-    const promotionPieces = player === 'white' ? ['♕', '♖', '♗', '♘'] : ['♛', '♜', '♝', '♞'];
+    const promotionPieces = player === 'white'
+        ? [PieceType.WhiteQueen, PieceType.WhiteRook, PieceType.WhiteBishop, PieceType.WhiteKnight]
+        : [PieceType.BlackQueen, PieceType.BlackRook, PieceType.BlackBishop, PieceType.BlackKnight];
     return (
         <div className="promotion-modal">
             <div className="promotion-options">
                 {promotionPieces.map((piece, index) => (
                     <div key={index} className="promotion-option" onClick={() => onPromote(piece)}>
-                        {piece}
+                        <img src={pieceImages[piece]} alt="" style={{ width: '50px', height: '50px' }} />
                     </div>
                 ))}
             </div>
@@ -469,7 +523,7 @@ const Chessboard: React.FC = () => {
     const [enPassantTarget, setEnPassantTarget] = React.useState<Position | null>(null);
     const isAIMoving = React.useRef<boolean>(false);
 
-    // Added state for tracking moved pieces
+    // State for tracking moved pieces
     const [movedPieces, setMovedPieces] = React.useState<MovedPieces>({
         whiteKingMoved: false,
         whiteKingRookMoved: false,
@@ -513,13 +567,20 @@ const Chessboard: React.FC = () => {
 
             const movedPiece = newBoard[fromRow][fromCol];
             newBoard[toRow][toCol] = movedPiece;
-            newBoard[fromRow][fromCol] = '';
+            newBoard[fromRow][fromCol] = PieceType.None;
 
-            // Check for pawn promotion
-            if (movedPiece === '♟' && toRow === 7) {
+            // Handle pawn promotion
+            if (movedPiece === PieceType.BlackPawn && toRow === 7) {
                 // Choose promotion piece (90% queen, 10% random other piece)
-                const promotionPieces = ['♛', '♜', '♝', '♞'];
-                const promotedPiece = Math.random() < 0.9 ? '♛' : promotionPieces[Math.floor(Math.random() * promotionPieces.length)];
+                const promotionPieces = [
+                    PieceType.BlackQueen,
+                    PieceType.BlackRook,
+                    PieceType.BlackBishop,
+                    PieceType.BlackKnight
+                ];
+                const promotedPiece = Math.random() < 0.9
+                    ? PieceType.BlackQueen
+                    : promotionPieces[Math.floor(Math.random() * promotionPieces.length)];
                 newBoard[toRow][toCol] = promotedPiece;
             }
 
@@ -543,7 +604,7 @@ const Chessboard: React.FC = () => {
         }
     }, [currentPlayer, makeAIMove, gameOver, showPromotion, enPassantTarget]);
 
-    const handlePromotion = (promotedPiece: Piece) => {
+    const handlePromotion = (promotedPiece: PieceType) => {
         if (promotionPosition) {
             const [row, col] = promotionPosition;
             const newBoard = board.map(r => [...r]);
@@ -566,26 +627,26 @@ const Chessboard: React.FC = () => {
             if (isLegalMove) {
                 const newBoard = board.map(r => [...r]);
                 const movedPiece = newBoard[startRow][startCol];
-                newBoard[startRow][startCol] = '';
+                newBoard[startRow][startCol] = PieceType.None;
                 newBoard[row][col] = movedPiece;
 
                 // Handle castling move
-                if (piece === '♔' && Math.abs(startCol - col) === 2) {
+                if (piece === PieceType.WhiteKing && Math.abs(startCol - col) === 2) {
                     if (col === 6) { // King-side castling
                         newBoard[startRow][5] = newBoard[startRow][7];
-                        newBoard[startRow][7] = '';
+                        newBoard[startRow][7] = PieceType.None;
                         setMovedPieces(prev => ({ ...prev, whiteKingRookMoved: true }));
                     } else if (col === 2) { // Queen-side castling
                         newBoard[startRow][3] = newBoard[startRow][0];
-                        newBoard[startRow][0] = '';
+                        newBoard[startRow][0] = PieceType.None;
                         setMovedPieces(prev => ({ ...prev, whiteQueenRookMoved: true }));
                     }
                 }
 
                 // Update moved pieces state
-                if (piece === '♔') {
+                if (piece === PieceType.WhiteKing) {
                     setMovedPieces(prev => ({ ...prev, whiteKingMoved: true }));
-                } else if (piece === '♖') {
+                } else if (piece === PieceType.WhiteRook) {
                     if (startRow === 7 && startCol === 7) {
                         setMovedPieces(prev => ({ ...prev, whiteKingRookMoved: true }));
                     } else if (startRow === 7 && startCol === 0) {
@@ -594,12 +655,17 @@ const Chessboard: React.FC = () => {
                 }
 
                 // Handle en passant capture
-                if (piece === '♙' && enPassantTarget && row === enPassantTarget[0] && col === enPassantTarget[1]) {
-                    newBoard[row + 1][col] = ''; // Remove the captured pawn
+                if (
+                    piece === PieceType.WhitePawn &&
+                    enPassantTarget &&
+                    row === enPassantTarget[0] &&
+                    col === enPassantTarget[1]
+                ) {
+                    newBoard[row + 1][col] = PieceType.None; // Remove the captured pawn
                 }
 
                 // Check for pawn promotion
-                if (piece === '♙' && row === 0) {
+                if (piece === PieceType.WhitePawn && row === 0) {
                     setShowPromotion(true);
                     setPromotionPosition([row, col]);
                 } else {
@@ -607,8 +673,8 @@ const Chessboard: React.FC = () => {
                     checkGameState(newBoard, 'black');
                 }
 
-                // Update en passant target
-                if (piece === '♙' && Math.abs(startRow - row) === 2) {
+                // Update en Passant target
+                if (piece === PieceType.WhitePawn && Math.abs(startRow - row) === 2) {
                     setEnPassantTarget([row + 1, col]);
                 } else {
                     setEnPassantTarget(null);
@@ -621,27 +687,27 @@ const Chessboard: React.FC = () => {
                 setSelectedPiece(null);
                 setLegalMoves([]);
             }
-        } else if (board[row][col]) {
+        } else if (board[row][col] !== PieceType.None) {
             const piece = board[row][col];
             if (isWhitePiece(piece)) {
                 setSelectedPiece({ piece, row, col });
                 setLegalMoves(getLegalMoves(piece, row, col, board, enPassantTarget, movedPieces).filter(move => {
                     const newBoard = board.map(r => [...r]);
                     newBoard[move[0]][move[1]] = newBoard[row][col];
-                    newBoard[row][col] = '';
+                    newBoard[row][col] = PieceType.None;
 
                     // Handle castling in simulation
                     const newMovedPieces = { ...movedPieces };
-                    if (piece === '♔') {
+                    if (piece === PieceType.WhiteKing) {
                         if (Math.abs(col - move[1]) === 2) {
                             newMovedPieces.whiteKingMoved = true;
                             if (move[1] === 6) {
                                 newBoard[row][5] = newBoard[row][7];
-                                newBoard[row][7] = '';
+                                newBoard[row][7] = PieceType.None;
                                 newMovedPieces.whiteKingRookMoved = true;
                             } else if (move[1] === 2) {
                                 newBoard[row][3] = newBoard[row][0];
-                                newBoard[row][0] = '';
+                                newBoard[row][0] = PieceType.None;
                                 newMovedPieces.whiteQueenRookMoved = true;
                             }
                         } else {
@@ -689,4 +755,4 @@ const Chessboard: React.FC = () => {
     );
 };
 
-export default Chessboard
+export default Chessboard;
