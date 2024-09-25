@@ -1,3 +1,5 @@
+
+
 import React from "react";
 
 type Piece = '♜' | '♞' | '♝' | '♛' | '♚' | '♟' | '♙' | '♖' | '♘' | '♗' | '♕' | '♔' | '' ;
@@ -177,10 +179,12 @@ const isSquareUnderAttack = (
                 (attackingColor === 'white' ? isWhitePiece(piece) : isBlackPiece(piece))
             ) {
                 let isAttacking = false;
+                const direction = attackingColor === 'white' ? -1 : 1;
+                const rowDiff = Math.abs(row - i);
+                const colDiff = Math.abs(col - j);
                 switch (piece) {
                     case '♙':
                     case '♟':
-                        const direction = attackingColor === 'white' ? -1 : 1;
                         isAttacking =
                             Math.abs(j - col) === 1 && i + direction === row;
                         break;
@@ -202,8 +206,7 @@ const isSquareUnderAttack = (
                         break;
                     case '♔':
                     case '♚':
-                        const rowDiff = Math.abs(row - i);
-                        const colDiff = Math.abs(col - j);
+
                         isAttacking = rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff) > 0;
                         break;
                 }
